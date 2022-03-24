@@ -5,29 +5,28 @@ import Button from '@material-ui/core/Button'
 import getWeb3 from '../getWeb3'
 import FundraiserFactory from '../contracts/FundraiserFactory.json'
 
-const NewFundraiser = () => {
+const NewFundraiser = ({ contract, accounts }) => {
   useEffect(() => {
-    async function init() {
-      try {
-        const web3 = await getWeb3()
-        const networkId = await web3.eth.net.getId()
-        const deployedNetwork = FundraiserFactory.networks[networkId]
-        const accounts = await web3.eth.getAccounts()
-        const instance = await new web3.eth.Contract(
-          FundraiserFactory.abi,
-          deployedNetwork && deployedNetwork.address
-        )
-
-        setAccounts(accounts)
-        setContract(instance)
-
-        const funds = await instance.methods.fundraiser(10, 0).call()
-        console.log('funds', funds)
-        setFunds(funds)
-      } catch (error) {
-        console.error(error)
-      }
-    }
+    // async function init() {
+    //   try {
+    //     const web3 = await getWeb3()
+    //     const networkId = await web3.eth.net.getId()
+    //     const deployedNetwork = FundraiserFactory.networks[networkId]
+    //     const accounts = await web3.eth.getAccounts()
+    //     const instance = await new web3.eth.Contract(
+    //       FundraiserFactory.abi,
+    //       deployedNetwork && deployedNetwork.address
+    //     )
+    //     setAccounts(accounts)
+    //     setContract(instance)
+    //     const funds = await instance.methods.fundraisers(10, 0).call()
+    //     console.log('funds', funds)
+    //     setFunds(funds)
+    //   } catch (error) {
+    //     console.error(error)
+    //   }
+    // }
+    // init()
   }, [])
 
   const useStyles = makeStyles((theme) => ({
@@ -60,20 +59,13 @@ const NewFundraiser = () => {
   const [description, setFundraiserDescription] = useState(null)
   const [imageUrl, setImageUrl] = useState(null)
   const [beneficiary, setBeneficiary] = useState(null)
-  const [custodian, setCustodian] = useState(null)
-  const [contract, setContract] = useState(null)
-  const [accounts, setAccounts] = useState(null)
-  const [funds, setFunds] = useState(null)
 
   const handleSubmit = async () => {
-    await contract.methods.createFundraiser(
-      name,
-      website,
-      imageUrl,
-      description,
-      beneficiary,
-      custodian
-    )
+    const res = await contract.methods
+      .createFundraiser(name, website, imageUrl, description, beneficiary)
+      .send({ from: accounts[0] })
+
+    console.log(res)
   }
   return (
     <div>
@@ -118,23 +110,13 @@ const NewFundraiser = () => {
         variant="outlined"
         inputProps={{ 'aria-label': 'bare' }}
       />
-      <label>Address</label>
+      <label>Beneficiary</label>
       <TextField
         id="outlined-bare"
         className={classes.textField}
         placeholder="Fundraiser Ethereum Address"
         margin="normal"
         onChange={(e) => setBeneficiary(e.target.value)}
-        variant="outlined"
-        inputProps={{ 'aria-label': 'bare' }}
-      />
-      <label>Custodian</label>
-      <TextField
-        id="outlined-bare"
-        className={classes.textField}
-        placeholder="Fundraiser Custodian"
-        margin="normal"
-        onChange={(e) => setCustodian(e.target.value)}
         variant="outlined"
         inputProps={{ 'aria-label': 'bare' }}
       />

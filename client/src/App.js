@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Link, Outlet } from 'react-router-dom'
+import { Link, Outlet, Routes, Route } from 'react-router-dom'
 
 import FactoryContract from './contracts/FundraiserFactory.json'
 import getWeb3 from './getWeb3'
@@ -8,14 +8,15 @@ import { makeStyles } from '@material-ui/core/styles'
 import AppBar from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
+import Home from './components/Home'
+import NewFundraiser from './components/NewFundraiser'
 
 const App = () => {
-  const [state, setState] = useState({
-    web3: null,
-    accounts: null,
-    contract: null,
-  })
-  const [storageValue, setStorageValue] = useState(0)
+  const [contract, setContract] = useState(null)
+  const [accounts, setAccounts] = useState(null)
+  const [web3, setWeb3] = useState(null)
+  const [fundraisers, setFundraisers] = useState(null)
+
   useEffect(() => {
     const init = async () => {
       try {
@@ -27,7 +28,13 @@ const App = () => {
           FactoryContract.abi,
           deployedNetwork && deployedNetwork.address
         )
-        setState({ web3, accounts, contract: instance })
+
+        setContract(instance)
+        setAccounts(accounts)
+        setWeb3(web3)
+        const fundraisers = await instance.methods.fundraisers(10, 0).call()
+        console.log(fundraisers)
+        setFundraisers(fundraisers)
       } catch (error) {
         alert(
           `Failed to load web3, accounts, or contract.
@@ -38,9 +45,6 @@ const App = () => {
     }
     init()
   }, [])
-  const runExample = async () => {
-    const { accounts, contract } = state
-  }
 
   const useStyles = makeStyles({
     root: {
@@ -49,22 +53,22 @@ const App = () => {
   })
   const classes = useStyles()
 
+  console.log('fundraisers', fundraisers)
+
   return (
-    <div>
-      <AppBar position="static" color="default">
-        <Toolbar>
-          <Typography variant="h6" color="inherit">
-            <Link className="nav-link" to="/home">
-              Home
-            </Link>
-          </Typography>
-          <Link className="nav-link" to="/new">
-            New Fundraiser
-          </Link>
-        </Toolbar>
-      </AppBar>
-      <Outlet />
-    </div>
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <Home fundraisers={fundraisers} web3={web3} accounts={accounts} />
+        }
+      >
+        <Route
+          path="/new"
+          element={<NewFundraiser contract={contract} accounts={accounts} />}
+        />
+      </Route>
+    </Routes>
   )
 }
 export default App

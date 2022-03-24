@@ -5,17 +5,10 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './index.css'
 import App from './App'
 import * as serviceWorker from './serviceWorker'
-import Home from './components/Home'
-import NewFundraiser from './components/NewFundraiser'
 
 ReactDOM.render(
   <BrowserRouter>
-    <Routes>
-      <Route exact path="/" element={<App />}>
-        <Route path="/home" element={<Home />} />
-        <Route path="/new" element={<NewFundraiser />} />
-      </Route>
-    </Routes>
+    <App />
   </BrowserRouter>,
   document.getElementById('root')
 )
